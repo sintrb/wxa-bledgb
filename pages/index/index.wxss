@@ -1,0 +1,103 @@
+page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.ble-devices {
+    height: 100%;
+    flex-grow: 1;
+    overflow-y: auto;
+    /* margin-bottom: 60px; */
+}
+
+.ble-device {
+    background: #eee;
+    height: 50px;
+}
+
+.buttons {
+    height: 40px;
+    padding: 2px;
+    /* position: fixed; */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid #eee;
+    /* background: red; */
+}
+
+.buttons button {
+    display: inline-block;
+    /* width: 80px; */
+    border-radius: 0;
+    background: none;
+    height: 30px;
+    width: 100px;
+    flex-grow: 1;
+    margin: 0 5px;
+    font-size: 13px;
+    color: #888;
+    line-height: 30px;
+    /* border: 1px solid #eee; */
+}
+
+.device {
+    border: 1px solid #eee;
+    margin: 2px 1px;
+    font-size: 14px;
+    font-family: Consolas, Monaco, monospace;
+}
+
+.device.connected .name {
+    background: green;
+}
+
+.device .rssi {
+    color: red;
+}
+
+.device .name {
+    margin-right: 5px;
+    min-width: 50px;
+    display: inline-block;
+}
+
+.device .ads {
+    padding-left: 10px;
+}
+
+.device .btn {
+    font-size: 10px;
+    height: 15px;
+    line-height: 15px;
+    border: 1px solid #eee;
+    margin: 0 2px;
+    padding: 0 5px;
+    border-radius: 2px;
+}
+
+.services {
+    padding-left: 10px;
+}
+
+.service {
+    background: #eee;
+    display: block;
+}
+
+.buttons .status {
+    min-width: 100px;
+    display: flex;
+    justify-content: center;
+}
+
+.buttons image.indicator {
+    width: 20px;
+    height: 20px;
+    border: 1ps solid #eee;
+    border-radius: 10px;
+    margin: 0 4px;
+}
