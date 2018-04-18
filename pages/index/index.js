@@ -9,15 +9,17 @@ Page({
             devices: [],
             available: false,
             discovering: false,
-        }
+        },
+        device: null,
     },
     onLoad: function (options) {
         let thiz = this;
         this.onBleDevicesFound({
-            devices: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(r => {
+            devices: [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30].map(r => {
                 return {
                     name: "X",
                     RSSI: -99,
+                    // connected: true,
                     deviceId: "12321312-1231231-12" + r,
                     advertisServiceUUIDs: [
                         "CDDDSE-EEXAS",
@@ -143,5 +145,18 @@ Page({
                 thiz.updateBleDevice(deviceId, { services: res.services })
             }
         });
-    }
+    },
+    onSelectDevice(e) {
+        let thiz = this;
+        let deviceId = e.target.dataset.deviceid;
+        let device = this.data.ble.devices.find(function (d) {
+            return d.deviceId == deviceId;
+        });
+        this.setData({
+            device: device
+        })
+    },
+    onEmpty(e) {
+
+    },
 })

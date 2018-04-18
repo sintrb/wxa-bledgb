@@ -1,31 +1,35 @@
-<view class='ble-devices'>
-    <block wx:for="{{ble.devices}}" wx:key="deviceId">
-        <view class="device {{item.connected? 'connected': ''}}">
-            <view class='nameinfo'>
-                <text class='name'>{{item.name}}</text>
-
-                <text class='rssi'>{{item.RSSI}} </text>
-                <text class='btn' data-deviceid="{{item.deviceId}}" bindtap='onConnectDevice'>Con</text>
-                <text class='btn' data-deviceid="{{item.deviceId}}" bindtap='onGetDeviceServices'>Ser</text>
-            </view>
-            <text class='deviceid'>{{item.deviceId}} </text>
-            <view class='ads'>
+<view class='page' disable-scroll="true" bindtouchmove="onEmpty">
+    <view class='ble-devices'>
+        <block wx:for="{{ble.devices}}" wx:key="deviceId">
+            <view class="device {{item.connected? 'connected': ''}}">
+                <view class='nameinfo'>
+                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='rssi'>{{item.RSSI}} </text>
+                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='name'>{{item.name}}</text>
+                    <view data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' style='width:1px; flex-grow:1;'></view>
+                    <view class='indicator status' data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice'></view>
+                </view>
+                <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='deviceid'>Device-ID:{{item.deviceId}} </text>
+                <!-- <view class='ads'>
                 <text wx:for="{{item.advertisServiceUUIDs}}" wx:for-item="ad" class='ad'>{{ad}} </text>
             </view>
-
             <view class='services'>
                 <text wx:for="{{item.services}}" wx:for-item="s" class='service'>{{s.uuid}} {{s.isPrimary}}</text>
+            </view> -->
             </view>
-        </view>
-    </block>
-</view>
-<view class='ble-device'>
-</view>
-<view class='buttons'>
-    <view class='status'>
-        <image class='indicator ' src='{{ble.available? "/img/bt-en.png": "/img/bt-dis.png"}}'></image>
-        <image class='indicator ' src='{{ble.discovering? "/img/scan-en.png": "/img/scan-dis.png"}}'></image>
+        </block>
     </view>
-    <button bindtap='startScanBle'>搜索</button>
-    <button bindtap='stopScanBle'>停止</button>
+    <view class='ble-device' wx:if='{{device}}'>
+        <view>{{device.deviceId}}</view>
+        <view class='services'>
+            <text wx:for="{{device.services}}" wx:for-item="s" class='service'>{{s.uuid}} {{s.isPrimary}}</text>
+        </view>
+    </view>
+    <view class='buttons'>
+        <view class='status'>
+            <image class='indicator ' src='{{ble.available? "/img/bt-en.png": "/img/bt-dis.png"}}'></image>
+            <image class='indicator ' src='{{ble.discovering? "/img/scan-en.png": "/img/scan-dis.png"}}'></image>
+        </view>
+        <button bindtap='startScanBle'>搜索</button>
+        <button bindtap='stopScanBle'>停止</button>
+    </view>
 </view>
