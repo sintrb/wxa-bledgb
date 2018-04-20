@@ -116,7 +116,7 @@ Page({
 
         try {
             let config = JSON.parse(wx.getStorageSync('config'));
-            console.log(config)
+            // console.log(config);
             this.setData({ config });
         }
         catch (e) {

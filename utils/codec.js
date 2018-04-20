@@ -98,7 +98,7 @@ function safeMap(arr, func) {
     return rarr;
 }
 
-let codes = {
+let codec = {
     gbk: {
         encode(text) {
             return splitToInts(gbk.encode(text))
@@ -143,15 +143,15 @@ let codes = {
 function test() {
     ['ABC123', 'Hello World', '你好 世界!', '这是一个测试文本👌'].map(text => {
         console.log("test for", text);
-        Object.keys(codes).map(k => {
-            let cd = codes[k];
+        Object.keys(codec).map(k => {
+            let cd = codec[k];
             let en = cd.encode(text);
             let de = cd.decode(en);
             console.log("\t", k, text == de ? "ok" : "fail", de);
         });
-    })
+    });
 }
 
 // test();
 
-module.exports = codes
+module.exports = codec
