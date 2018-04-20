@@ -116,7 +116,7 @@ Page({
 
         try {
             let config = JSON.parse(wx.getStorageSync('config'));
-            // console.log(config);
+            console.log(config)
             this.setData({ config });
         }
         catch (e) {
@@ -164,7 +164,7 @@ Page({
         }
 
         if (ble.discovering && !rawdiscovering) {
-            this.log("bluetooth scaning");
+            this.log("bluetooth scanning");
         }
         else if (!ble.discovering && rawdiscovering) {
             this.log("bluetooth scan stopped");
@@ -230,7 +230,7 @@ Page({
             }
         }
     },
-    startScanBle() {
+    startScanBle(e) {
         let thiz = this;
         this.updateBleState({
             devices: [],
@@ -244,7 +244,7 @@ Page({
         });
 
     },
-    stopScanBle() {
+    stopScanBle(e) {
         let thiz = this;
         thiz.log("stop scanning...");
         wx.stopBluetoothDevicesDiscovery({
@@ -253,7 +253,7 @@ Page({
             }
         })
     },
-    clearAll() {
+    clearAll(e) {
         let ble = this.data.ble;
         ble.devices = [];
         this.setData({
