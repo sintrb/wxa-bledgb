@@ -9,28 +9,52 @@ page {
 }
 
 .ble-devices {
-    height: 100%;
+    /* height: 100%; */
     flex-grow: 1;
     overflow-y: auto;
     /* margin-bottom: 60px; */
 }
 
+.ble-logs {
+    /* max-height: 120px; */
+    height: 120px;
+    margin: 0 -2px;
+    border: 1px solid #eee;
+    font-size: 12px;
+    overflow-x: hidden;
+    display: block;
+}
+
 .ble-device {
-    background: #eee;
-    height: 50px;
+    /* background: #eee; */
+    padding: 2px;
+    border: 1px solid #eee;
+    margin: 2px;
+}
+
+.btl-debug {
+    padding: 2px;
+    border: 1px solid #eee;
+    margin: 2px;
+}
+
+.btl-buttons {
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.btl-buttons.buttons {
+    padding: 5px;
 }
 
 .buttons {
     height: 40px;
     padding: 2px;
     /* position: fixed; */
-    bottom: 0;
-    left: 0;
-    right: 0;
     display: flex;
     align-items: center;
-    border-top: 1px solid #eee;
-    /* background: red; */
+    /* border-top: 1px solid #eee; *//* background: red; */
 }
 
 .buttons button {
@@ -39,16 +63,17 @@ page {
     border-radius: 0;
     background: none;
     height: 30px;
-    width: 100px;
+    width: 80px;
     flex-grow: 1;
     margin: 0 5px;
     font-size: 13px;
-    color: #888;
+    color: #000;
     line-height: 30px;
     /* border: 1px solid #eee; */
 }
 
 .device {
+    border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
     margin: 2px 1px;
     padding: 5px;
@@ -60,6 +85,10 @@ page {
     background: #0e0;
 }
 
+.device.selected {
+    background: #00bcd4;
+}
+
 .device .nameinfo {
     display: flex;
     align-items: center;
@@ -67,7 +96,7 @@ page {
 
 .device .rssi {
     color: red;
-    min-width: 50px;
+    min-width: 100px;
 }
 
 .device .name {
@@ -104,6 +133,7 @@ page {
 .service {
     background: #eee;
     display: block;
+    font-size: 14px;
 }
 
 .buttons .status {
@@ -118,4 +148,66 @@ page {
     border: 1ps solid #eee;
     border-radius: 10px;
     margin: 0 4px;
+}
+
+.characteristic {
+    font-size: 12px;
+    display: flex;
+    padding-left: 10px;
+    align-items: center;
+}
+
+.characteristic .prop {
+    color: gray;
+    /* border: 1px solid #eee; */
+    margin: 1px;
+}
+
+.characteristic .prop.true {
+    color: red;
+    font-weight: bold;
+}
+
+.ble-device .services {
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.selected {
+    background: #00bcd4;
+}
+
+.btl-debug .buttons button {
+    color: #888;
+}
+
+.btl-debug .buttons button.enable {
+    color: #000;
+}
+
+textarea.data {
+    display: block;
+    height: 40px;
+    width: auto;
+    padding: 2px;
+    border-bottom: 1px solid #eee;
+    /* margin: 2px; */
+    font-size: 12px;
+}
+
+.ble-logs text {
+    display: block;
+    padding: 0 2px;
+}
+
+.about {
+    padding: 5px;
+    font-size: 14px;
+    text-align: center;
+}
+
+.about .small {
+    font-size: 10px;
+    color: gray;
+    text-align: center;
 }

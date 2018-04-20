@@ -1,35 +1,76 @@
-<view class='page' disable-scroll="true" bindtouchmove="onEmpty">
+<view class='page' disable-scroll="true">
+    <view class='about' wx:if="{{!ble.devices || !ble.devices.length}}">
+        <view wx:if="{{ble.discovering}}" style='padding:10px 0;'>搜索中...</view>
+        <view wx:if="{{!ble.discovering}}" style='padding:10px;'>没有可显示设备，请打开蓝牙点击"搜索"来查找周围的BLE设备!</view>
+        <image wx:if="{{!ble.discovering}}" style='width:120px;height:120px;' src='/img/wxacode.jpeg'></image>
+        <view wx:if="{{!ble.discovering}}" class='small' style='margin-top:10px;'>版本: V{{version}}  作者: Sin</view>
+        <view wx:if="{{!ble.discovering}}" class='small'>小程序源代码: https://github.com/sintrb/wxa-bledgb</view>
+    </view>
     <view class='ble-devices'>
         <block wx:for="{{ble.devices}}" wx:key="deviceId">
-            <view class="device {{item.connected? 'connected': ''}}">
+            <view class="device {{device && device.deviceId==item.deviceId?'selected': ''}} {{item.connected? 'connected': ''}}">
                 <view class='nameinfo'>
-                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='rssi'>{{item.RSSI}} </text>
-                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='name'>{{item.name}}</text>
-                    <view data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' style='width:1px; flex-grow:1;'></view>
+                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='rssi'>信号:{{item.RSSI}}dB</text>
+                    <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='name'>名称:{{item.name}}</text>
+                    <view data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' style='width:1px; flex-grow:1;'>　</view>
                     <view class='indicator status' data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice'></view>
                 </view>
-                <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='deviceid'>Device-ID:{{item.deviceId}} </text>
-                <!-- <view class='ads'>
-                <text wx:for="{{item.advertisServiceUUIDs}}" wx:for-item="ad" class='ad'>{{ad}} </text>
-            </view>
-            <view class='services'>
-                <text wx:for="{{item.services}}" wx:for-item="s" class='service'>{{s.uuid}} {{s.isPrimary}}</text>
-            </view> -->
+                <text data-deviceid="{{item.deviceId}}" bindtap='onSelectDevice' class='deviceid'>设备ID:{{item.deviceId}} </text>
             </view>
         </block>
     </view>
+    <scroll-view class='ble-logs' scroll-y="true" scroll-into-view="log-{{lastLog.index}}">
+        <!-- <view class='ble-logs'> -->
+        <block wx:for="{{logs}}" wx:key="index">
+            <text id="log-{{item.index}}">[{{item.index}}] {{item.content}}</text>
+        </block>
+        <!-- </view> -->
+    </scroll-view>
     <view class='ble-device' wx:if='{{device}}'>
         <view>{{device.deviceId}}</view>
         <view class='services'>
-            <text wx:for="{{device.services}}" wx:for-item="s" class='service'>{{s.uuid}} {{s.isPrimary}}</text>
+            <view wx:for="{{device.services}}" wx:for-item="s" class='service'>
+                <text class='{{char && char.serviceId==s.uuid ? "selected": ""}}' data-serviceid="{{s.uuid}}" bindtap='onServiceSelected'>{{s.uuid}}</text>
+                <text wx:if="{{s.isPrimary}}" style='color:red;'>主</text>
+                <view class='characteristic' wx:for="{{s.characteristics}}" wx:for-item="c">
+                    <text class='{{char && char.uuid==c.uuid && char.serviceId==s.uuid ? "selected": ""}}' data-serviceid="{{s.uuid}}" data-charid="{{c.uuid}}" bindtap='onCharacteristicSelected'>{{c.uuid}}</text>
+                    <text data-serviceid="{{s.uuid}}" data-charid="{{c.uuid}}" bindtap='onCharacteristicSelected' class='prop read {{c.properties.read && "true" || ""}}'>读</text>
+                    <text data-serviceid="{{s.uuid}}" data-charid="{{c.uuid}}" bindtap='onCharacteristicSelected' class='prop write {{c.properties.write && "true" || ""}}'>写</text>
+                    <text data-serviceid="{{s.uuid}}" data-charid="{{c.uuid}}" bindtap='onCharacteristicSelected' class='prop notifyread {{c.properties.notify && "true" || ""}}'>通知</text>
+                    <text data-serviceid="{{s.uuid}}" data-charid="{{c.uuid}}" bindtap='onCharacteristicSelected' style='flex-grow:1;width:10px;' class='prop indicate {{c.properties.indicate && "true" || ""}}'>指示</text>
+                </view>
+            </view>
         </view>
     </view>
-    <view class='buttons'>
+    <view class='btl-debug' wx:if="{{char}}">
+        <view>
+            <textarea bindinput="onDataChange" class='data' value='{{config.data}}'></textarea>
+        </view>
+        <view class='buttons'>
+            <view class='status'>
+                <picker bindchange="onDataTypeChange" value="{{config.datatype}}" range="{{datatypes}}">
+                    <view class="picker">
+                        {{config.datatype}}
+                    </view>
+                </picker>
+                <view wx:if="{{config.datatype == 'TEXT'}}" style='margin:0 2px;'>:</view>
+                <picker wx:if="{{config.datatype == 'TEXT'}}" bindchange="onEncodeTypeChange" value="{{config.encodetypes}}" range="{{encodetypes}}">
+                    <view class="picker">
+                        {{config.encodetype}}
+                    </view>
+                </picker>
+            </view>
+            <button class='read {{char.properties.read && "enable" || ""}}' bindtap='onRead'>读取</button>
+            <button class='write {{char.properties.write && "enable" || ""}}' bindtap='onWrite'>写入</button>
+        </view>
+    </view>
+    <view class='buttons btl-buttons'>
         <view class='status'>
             <image class='indicator ' src='{{ble.available? "/img/bt-en.png": "/img/bt-dis.png"}}'></image>
             <image class='indicator ' src='{{ble.discovering? "/img/scan-en.png": "/img/scan-dis.png"}}'></image>
         </view>
         <button bindtap='startScanBle'>搜索</button>
         <button bindtap='stopScanBle'>停止</button>
+        <button bindtap='clearAll'>清空</button>
     </view>
 </view>
