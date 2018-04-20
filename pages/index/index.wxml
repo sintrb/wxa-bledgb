@@ -3,7 +3,7 @@
         <view wx:if="{{ble.discovering}}" style='padding:10px 0;'>搜索中...</view>
         <view wx:if="{{!ble.discovering}}" style='padding:10px;'>没有可显示设备，请打开蓝牙点击"搜索"来查找周围的BLE设备!</view>
         <image wx:if="{{!ble.discovering}}" style='width:120px;height:120px;' src='/img/wxacode.jpeg'></image>
-        <view wx:if="{{!ble.discovering}}" class='small' style='margin-top:10px;'>版本: V{{version}}  作者: Sin</view>
+        <view wx:if="{{!ble.discovering}}" class='small' style='margin-top:10px;'>版本: V{{version}} 作者: Sin</view>
         <view wx:if="{{!ble.discovering}}" class='small'>小程序源代码: https://github.com/sintrb/wxa-bledgb</view>
     </view>
     <view class='ble-devices'>
@@ -27,7 +27,7 @@
         <!-- </view> -->
     </scroll-view>
     <view class='ble-device' wx:if='{{device}}'>
-        <view>{{device.deviceId}}</view>
+        <view bindtap='onGetDeviceServices'>{{device.deviceId}}</view>
         <view class='services'>
             <view wx:for="{{device.services}}" wx:for-item="s" class='service'>
                 <text class='{{char && char.serviceId==s.uuid ? "selected": ""}}' data-serviceid="{{s.uuid}}" bindtap='onServiceSelected'>{{s.uuid}}</text>

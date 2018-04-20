@@ -289,6 +289,10 @@ Page({
     onGetDeviceServices(e, devid) {
         let thiz = this;
         let deviceId = devid ? devid : this.data.device.deviceId;
+        if (!devid && !this.data.device.connected) {
+            thiz.log("not connected", this.data.char.deviceId);
+            return;
+        }
         thiz.log('getting services...');
         wx.getBLEDeviceServices({
             deviceId: deviceId,
