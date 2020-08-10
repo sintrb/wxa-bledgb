@@ -7,7 +7,7 @@ import codec from '../../utils/codec.js'
 
 Page({
     data: {
-        version: "1.0",
+        version: "2.0.0",
         ble: {
             devices: [],
             available: false,
@@ -17,7 +17,7 @@ Page({
         characteristic: null,
 
         datatypes: ['HEX', 'DEC', 'BIN', 'TEXT'],
-        encodetypes: ['ASCII', 'UTF8', 'GBK',],
+        encodetypes: ['ASCII', 'UTF8', 'GBK', ],
         config: {
             datatype: 'HEX',
             encodetype: 'GBK',
@@ -41,7 +41,10 @@ Page({
         };
         logs.push(lastLog)
         logs.splice(0, logs.length - 50);
-        this.setData({ logs, lastLog });
+        this.setData({
+            logs,
+            lastLog
+        });
     },
     onLoad: function (options) {
         let thiz = this;
@@ -96,7 +99,9 @@ Page({
         })
         wx.onBLEConnectionStateChange(function (res) {
             console.log(`device ${res.deviceId} state has changed, connected: ${res.connected}`)
-            thiz.updateBleDevice(res.deviceId, { connected: res.connected });
+            thiz.updateBleDevice(res.deviceId, {
+                connected: res.connected
+            });
         })
         wx.openBluetoothAdapter({
             success: function (res) {
@@ -116,10 +121,12 @@ Page({
 
         try {
             let config = JSON.parse(wx.getStorageSync('config'));
-            console.log(config)
-            this.setData({ config });
-        }
-        catch (e) {
+            config.datatypeIx = this.data.datatypes.indexOf(config.datatype);
+            config.encodetypeIx = this.data.encodetypes.indexOf(config.encodetype);
+            this.setData({
+                config
+            });
+        } catch (e) {
 
         }
         this.log("没有可显示设备，请打开蓝牙点击'搜索'来查找周围的BLE设备!");
@@ -134,8 +141,7 @@ Page({
             if (!rawdev) {
                 thiz.log("found", dev.deviceId);
                 rawdevs.push(dev);
-            }
-            else {
+            } else {
                 Object.keys(dev).map(f => {
                     rawdev[f] = dev[f];
                 });
@@ -158,15 +164,13 @@ Page({
         });
         if (ble.available && !rawavailable) {
             this.log("bluetooth enable");
-        }
-        else if (!ble.available && rawavailable) {
+        } else if (!ble.available && rawavailable) {
             this.log("bluetooth disable");
         }
 
         if (ble.discovering && !rawdiscovering) {
             this.log("bluetooth scanning");
-        }
-        else if (!ble.discovering && rawdiscovering) {
+        } else if (!ble.discovering && rawdiscovering) {
             this.log("bluetooth scan stopped");
         }
     },
@@ -181,8 +185,7 @@ Page({
             if (!dev.connected && state.connected) {
                 thiz.log("connected", dev.deviceId);
                 this.onGetDeviceServices(null, deviceId);
-            }
-            else if (dev.connected && state.connected === false) {
+            } else if (dev.connected && state.connected === false) {
                 thiz.log("disconnected", dev.deviceId);
             }
             Object.keys(state).map(k => {
@@ -193,8 +196,7 @@ Page({
                     ble: ble,
                     device: dev
                 });
-            }
-            else {
+            } else {
                 thiz.setData({
                     ble: ble,
                 });
@@ -221,8 +223,7 @@ Page({
                         ble: ble,
                         device: dev
                     });
-                }
-                else {
+                } else {
                     thiz.setData({
                         ble: ble,
                     });
@@ -277,8 +278,7 @@ Page({
             wx.closeBLEConnection({
                 deviceId: deviceId,
             });
-        }
-        else {
+        } else {
             thiz.log('connecting', deviceId);
             wx.createBLEConnection({
                 deviceId: deviceId,
@@ -299,7 +299,9 @@ Page({
             success: function (res) {
                 console.log('device services:', res.services)
                 thiz.log('service got, count', res.services.length);
-                thiz.updateBleDevice(deviceId, { services: res.services })
+                thiz.updateBleDevice(deviceId, {
+                    services: res.services
+                })
             }
         });
     },
@@ -313,8 +315,7 @@ Page({
                 device: null,
                 char: null,
             });
-        }
-        else {
+        } else {
             let device = this.data.ble.devices.find(function (d) {
                 return d.deviceId == deviceId;
             });
@@ -337,12 +338,15 @@ Page({
             success: function (res) {
                 if (res && res.characteristics) {
                     thiz.log('characteristics got, count', res.characteristics.length);
-                    thiz.updateDeviceService(deviceId, serviceId, { characteristics: res.characteristics });
+                    thiz.updateDeviceService(deviceId, serviceId, {
+                        characteristics: res.characteristics
+                    });
                 }
             }
         });
     },
     onCharacteristicSelected(e) {
+        let thiz = this;
         let serviceId = e.target.dataset.serviceid;
         let charId = e.target.dataset.charid;
         let ble = this.data.ble;
@@ -357,13 +361,54 @@ Page({
             this.setData({
                 char: null
             });
-        }
-        else {
+        } else {
             char.serviceId = serviceId;
             this.setData({
                 char: char
             });
         }
+        wx.onBLECharacteristicValueChange(function (characteristic) {
+            let value = characteristic.value;
+            let bytes = new Uint8Array(characteristic.value);
+            var data = "";
+            if (bytes) {
+                if (thiz.data.config.datatype == 'TEXT') {
+                    try {
+                        if (thiz.data.config.encodetype == 'GBK') {
+                            data = codec.gbk.decode(bytes);
+                        } else if (thiz.data.config.encodetype == 'UTF8') {
+                            data = codec.utf8.decode(bytes);
+                        } else {
+                            data = codec.ascii.decode(bytes);
+                        }
+                    } catch (e) {
+                        data = 'decode error!!!';
+                    }
+                } else {
+                    let dx = {
+                        HEX: [16, 2],
+                        DEC: [10, 0],
+                        BIN: [2, 8]
+                    } [thiz.data.config.datatype];
+                    let d = dx[0];
+                    let l = dx[1];
+                    let j = "00000000000000";
+                    let chars = new Array(bytes.length);
+                    for (let i = 0; i < bytes.length; ++i) {
+                        let t = bytes[i];
+                        let s = t.toString(d);
+                        if (s.length < l) {
+                            chars[i] = j.substr(0, l - s.length) + s;
+                        } else {
+                            chars[i] = s;
+                        }
+
+                    }
+                    data = chars.join(" ");
+                }
+            }
+            thiz.log('read len', value.byteLength, ":", data);
+        });
     },
     onWrite(e) {
         let thiz = this;
@@ -381,21 +426,18 @@ Page({
             if (this.data.config.datatype == 'TEXT') {
                 if (this.data.config.encodetype == 'GBK') {
                     data = codec.gbk.encode(rawdata);
-                }
-                else if (this.data.config.encodetype == 'UTF8') {
+                } else if (this.data.config.encodetype == 'UTF8') {
                     data = codec.utf8.encode(rawdata);
-                }
-                else {
+                } else {
                     data = codec.ascii.encode(rawdata);
                 }
-            }
-            else {
+            } else {
                 let strs = rawdata.split(" ");
                 let d = {
                     HEX: 16,
                     DEC: 10,
                     BIN: 2
-                }[this.data.config.datatype];
+                } [this.data.config.datatype];
                 for (let i = 0; i < strs.length; ++i) {
                     let s = strs[i].trim();
                     if (!s)
@@ -406,8 +448,7 @@ Page({
                             throw Exception("NaN");
                         }
                         data.push(v);
-                    }
-                    catch (e) {
+                    } catch (e) {
                         thiz.log("parse", s, 'to', this.data.config.datatype, " fail");
                         return;
                     }
@@ -430,8 +471,7 @@ Page({
                 }
             });
             wx.setStorageSync('config', JSON.stringify(this.data.config));
-        }
-        else {
+        } else {
             thiz.log("not select characteristic");
         }
     },
@@ -447,48 +487,7 @@ Page({
                 return;
             }
             thiz.log("reading...");
-            wx.onBLECharacteristicValueChange(function (characteristic) {
-                let value = characteristic.value;
-                let bytes = new Uint8Array(characteristic.value);
-                var data = "";
-                if (bytes) {
-                    if (thiz.data.config.datatype == 'TEXT') {
-                        if (thiz.data.config.encodetype == 'GBK') {
-                            data = codec.gbk.decode(bytes);
-                        }
-                        else if (thiz.data.config.encodetype == 'UTF8') {
-                            data = codec.utf8.decode(bytes);
-                        }
-                        else {
-                            data = codec.ascii.decode(bytes);
-                        }
-                    }
-                    else {
-                        let dx = {
-                            HEX: [16, 2],
-                            DEC: [10, 0],
-                            BIN: [2, 8]
-                        }[thiz.data.config.datatype];
-                        let d = dx[0];
-                        let l = dx[1];
-                        let j = "00000000000000";
-                        let chars = new Array(bytes.length);
-                        for (let i = 0; i < bytes.length; ++i) {
-                            let t = bytes[i];
-                            let s = t.toString(d);
-                            if (s.length < l) {
-                                chars[i] = j.substr(0, l - s.length) + s;
-                            }
-                            else {
-                                chars[i] = s;
-                            }
 
-                        }
-                        data = chars.join(" ");
-                    }
-                }
-                thiz.log('read len', value.byteLength, ":", data);
-            });
 
             wx.readBLECharacteristicValue({
                 deviceId: this.data.device.deviceId,
@@ -498,13 +497,42 @@ Page({
                     thiz.log('read', res.errMsg);
                 }
             });
-        }
-        else {
+        } else {
             thiz.log("not select characteristic");
         }
     },
+
+    onNotify(e) {
+        let thiz = this;
+        if (this.data.char) {
+            if (!this.data.device.connected) {
+                thiz.log("not connected", this.data.char.deviceId);
+                return;
+            }
+            if (!this.data.char.properties.notify) {
+                thiz.log("not notifiable", this.data.char.uuid);
+                return;
+            }
+            this.data.char.notify_state = !this.data.char.notify_state;
+            wx.notifyBLECharacteristicValueChange({
+                state: this.data.char.notify_state, // 启用 notify 功能
+                deviceId: this.data.device.deviceId,
+                serviceId: this.data.char.serviceId,
+                characteristicId: this.data.char.uuid,
+                success: (res) => {
+                    thiz.log(this.data.char.notify_state ? "add notify ok" : "remove notify ok", this.data.char.uuid);
+                }
+            });
+            this.setData({
+                char: this.data.char,
+                device: this.data.device,
+            });
+        }
+    },
+
     onDataTypeChange(e) {
         let config = this.data.config;
+        config.datatypeIx = e.detail.value;
         config.datatype = this.data.datatypes[e.detail.value];
         this.setData({
             config
@@ -512,6 +540,7 @@ Page({
     },
     onEncodeTypeChange(e) {
         let config = this.data.config;
+        config.encodetypeIx = e.detail.value;
         config.encodetype = this.data.encodetypes[e.detail.value];
         this.setData({
             config
@@ -524,4 +553,3 @@ Page({
 
     },
 })
-
